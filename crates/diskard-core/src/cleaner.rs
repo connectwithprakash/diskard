@@ -52,7 +52,8 @@ pub fn clean(findings: &[Finding], mode: DeleteMode) -> Result<CleanResult> {
     })
 }
 
-fn delete_path(path: &Path, mode: DeleteMode) -> Result<()> {
+/// Delete a single path using the specified mode.
+pub fn delete_path(path: &Path, mode: DeleteMode) -> Result<()> {
     if !path.exists() {
         return Ok(());
     }

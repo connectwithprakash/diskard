@@ -42,8 +42,8 @@ pub fn run(findings: Vec<Finding>) -> io::Result<()> {
             // Status bar
             let status = if let Some(ref msg) = app.status_message {
                 msg.clone()
-            } else if app.mode == AppMode::DrillDown {
-                " ↑↓/jk: navigate | l/→/Enter: open | h/←: back | Esc/q: exit inspect".to_string()
+            } else if app.mode == AppMode::DrillDown || app.mode == AppMode::ConfirmDrillDown {
+                " ↑↓/jk: navigate | Space: toggle | a: all | d: delete | l/→/Enter: open | h/←: back | Esc/q: exit".to_string()
             } else {
                 " ↑↓/jk: navigate | Space: toggle | a: all | l/→: inspect | Enter: delete | ?: help | q: quit"
                     .to_string()
@@ -53,7 +53,7 @@ pub fn run(findings: Vec<Finding>) -> io::Result<()> {
             frame.render_widget(status_bar, chunks[1]);
 
             // Overlays
-            if app.mode == AppMode::Confirm {
+            if app.mode == AppMode::Confirm || app.mode == AppMode::ConfirmDrillDown {
                 components::confirm::render(frame, area, &app);
             }
             if app.show_help {
@@ -109,6 +109,26 @@ pub fn run(findings: Vec<Finding>) -> io::Result<()> {
                                     state.move_up();
                                 }
                             }
+                            KeyCode::Char(' ') => {
+                                if let Some(ref mut state) = app.drill_down {
+                                    state.toggle_selected();
+                                }
+                            }
+                            KeyCode::Char('a') => {
+                                if let Some(ref mut state) = app.drill_down {
+                                    state.select_all();
+                                }
+                            }
+                            KeyCode::Char('d') => {
+                                if let Some(ref state) = app.drill_down {
+                                    if state.checked_count() > 0 {
+                                        app.mode = AppMode::ConfirmDrillDown;
+                                    } else {
+                                        app.status_message =
+                                            Some(" No items selected. Use Space to select.".into());
+                                    }
+                                }
+                            }
                             KeyCode::Char('l') | KeyCode::Right | KeyCode::Enter => {
                                 if let Some(ref mut state) = app.drill_down {
                                     if !state.drill_into() {
@@ -133,6 +153,43 @@ pub fn run(findings: Vec<Finding>) -> io::Result<()> {
                             }
                             KeyCode::Esc | KeyCode::Char('q') => {
                                 app.exit_drill_down();
+                            }
+                            _ => {}
+                        },
+                        AppMode::ConfirmDrillDown => match key.code {
+                            KeyCode::Char('y') | KeyCode::Enter => {
+                                if let Some(ref mut state) = app.drill_down {
+                                    let to_delete = state.checked_paths();
+                                    let mut deleted = 0u64;
+                                    let mut count = 0usize;
+                                    let mut err_count = 0usize;
+                                    for (path, size) in &to_delete {
+                                        match cleaner::delete_path(path, DeleteMode::Trash) {
+                                            Ok(()) => {
+                                                deleted += size;
+                                                count += 1;
+                                            }
+                                            Err(_) => err_count += 1,
+                                        }
+                                    }
+                                    state.remove_checked();
+                                    let msg = if err_count > 0 {
+                                        format!(
+                                            " Trashed {count} items ({}), {err_count} failed",
+                                            format_bytes(deleted),
+                                        )
+                                    } else {
+                                        format!(
+                                            " Moved {count} items to Trash, freed {}",
+                                            format_bytes(deleted),
+                                        )
+                                    };
+                                    app.status_message = Some(msg);
+                                }
+                                app.mode = AppMode::DrillDown;
+                            }
+                            KeyCode::Char('n') | KeyCode::Esc => {
+                                app.mode = AppMode::DrillDown;
                             }
                             _ => {}
                         },

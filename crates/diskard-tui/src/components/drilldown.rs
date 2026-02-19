@@ -13,6 +13,7 @@ pub fn render(frame: &mut Frame, area: Rect, state: &DrillDownState) {
         .entries
         .iter()
         .map(|entry| {
+            let checkbox = if entry.checked { "[x]" } else { "[ ]" };
             let (name_display, name_color) = if entry.is_dir {
                 (format!("{}/", entry.name), Color::Blue)
             } else {
@@ -20,8 +21,9 @@ pub fn render(frame: &mut Frame, area: Rect, state: &DrillDownState) {
             };
 
             ListItem::new(Line::from(vec![
+                Span::styled(format!(" {checkbox} "), Style::default().fg(Color::White)),
                 Span::styled(
-                    format!(" {:>10}", format_bytes(entry.size_bytes)),
+                    format!("{:>10}", format_bytes(entry.size_bytes)),
                     Style::default().fg(Color::Cyan),
                 ),
                 Span::raw("  "),
@@ -32,12 +34,23 @@ pub fn render(frame: &mut Frame, area: Rect, state: &DrillDownState) {
 
     let current = state.current_path();
     let breadcrumb = current.to_string_lossy();
-    let title = format!(
-        " {} | {} entries | {} ",
-        breadcrumb,
-        state.entries.len(),
-        format_bytes(state.total_size()),
-    );
+    let checked = state.checked_count();
+    let title = if checked > 0 {
+        format!(
+            " {} | {} entries | {} selected | {} ",
+            breadcrumb,
+            state.entries.len(),
+            checked,
+            format_bytes(state.checked_size()),
+        )
+    } else {
+        format!(
+            " {} | {} entries | {} ",
+            breadcrumb,
+            state.entries.len(),
+            format_bytes(state.total_size()),
+        )
+    };
 
     let list = List::new(items)
         .block(

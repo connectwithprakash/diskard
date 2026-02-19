@@ -24,6 +24,7 @@ pub enum AppMode {
     Browse,
     Confirm,
     DrillDown,
+    ConfirmDrillDown,
 }
 
 /// A single entry (file or directory) inside a drill-down listing.
@@ -32,6 +33,7 @@ pub struct DrillDownEntry {
     pub path: PathBuf,
     pub size_bytes: u64,
     pub is_dir: bool,
+    pub checked: bool,
 }
 
 /// State for the drill-down inspector.
@@ -63,6 +65,7 @@ fn scan_directory(path: &Path) -> Option<Vec<DrillDownEntry>> {
                 path,
                 size_bytes,
                 is_dir,
+                checked: false,
             }
         })
         .collect();
@@ -134,6 +137,50 @@ impl DrillDownState {
     /// Current directory being viewed.
     pub fn current_path(&self) -> &Path {
         self.stack.last().unwrap()
+    }
+
+    pub fn toggle_selected(&mut self) {
+        if let Some(entry) = self.entries.get_mut(self.selected) {
+            entry.checked = !entry.checked;
+        }
+    }
+
+    pub fn select_all(&mut self) {
+        let all_checked = self.entries.iter().all(|e| e.checked);
+        for entry in &mut self.entries {
+            entry.checked = !all_checked;
+        }
+    }
+
+    pub fn checked_count(&self) -> usize {
+        self.entries.iter().filter(|e| e.checked).count()
+    }
+
+    pub fn checked_size(&self) -> u64 {
+        self.entries
+            .iter()
+            .filter(|e| e.checked)
+            .map(|e| e.size_bytes)
+            .sum()
+    }
+
+    pub fn checked_paths(&self) -> Vec<(PathBuf, u64)> {
+        self.entries
+            .iter()
+            .filter(|e| e.checked)
+            .map(|e| (e.path.clone(), e.size_bytes))
+            .collect()
+    }
+
+    /// Remove checked entries and rescan the current directory.
+    pub fn remove_checked(&mut self) {
+        let current = self.current_path().to_path_buf();
+        if let Some(entries) = scan_directory(&current) {
+            self.entries = entries;
+            if self.selected >= self.entries.len() && !self.entries.is_empty() {
+                self.selected = self.entries.len() - 1;
+            }
+        }
     }
 }
 

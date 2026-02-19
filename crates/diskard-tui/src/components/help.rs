@@ -7,7 +7,7 @@ use ratatui::Frame;
 /// Render a help overlay.
 pub fn render(frame: &mut Frame, area: Rect) {
     let popup_width = 40.min(area.width.saturating_sub(4));
-    let popup_height = 13.min(area.height.saturating_sub(2));
+    let popup_height = 15.min(area.height.saturating_sub(2));
     let popup_area = Rect::new(
         (area.width - popup_width) / 2,
         (area.height - popup_height) / 2,
@@ -30,12 +30,20 @@ pub fn render(frame: &mut Frame, area: Rect) {
             Span::raw("Toggle selection"),
         ]),
         Line::from(vec![
+            Span::styled(" a ", Style::default().fg(Color::Cyan)),
+            Span::raw("Select/deselect all"),
+        ]),
+        Line::from(vec![
             Span::styled(" l/→ ", Style::default().fg(Color::Cyan)),
             Span::raw("Inspect directory"),
         ]),
         Line::from(vec![
+            Span::styled(" d ", Style::default().fg(Color::Cyan)),
+            Span::raw("Delete selected (in inspect)"),
+        ]),
+        Line::from(vec![
             Span::styled(" Enter ", Style::default().fg(Color::Cyan)),
-            Span::raw("Delete selected"),
+            Span::raw("Delete selected / open dir"),
         ]),
         Line::from(vec![
             Span::styled(" ? ", Style::default().fg(Color::Cyan)),
