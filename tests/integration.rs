@@ -7,7 +7,7 @@ use diskard_core::size;
 #[test]
 fn test_all_recognizers_exist() {
     let recognizers = all_recognizers();
-    assert!(recognizers.len() >= 14, "Expected at least 14 recognizers");
+    assert!(recognizers.len() >= 18, "Expected at least 18 recognizers");
 }
 
 #[test]
@@ -37,7 +37,7 @@ fn test_scanner_respects_risk_filter() {
     let config = Config::default();
     let options = ScanOptions {
         max_risk: RiskLevel::Safe,
-        min_size: 0,
+        ..Default::default()
     };
 
     let result = scanner::scan(&recognizers, &config, &options);
@@ -81,6 +81,27 @@ fn test_finding_size_human() {
         !finding.size_human().is_empty(),
         "size_human should return a non-empty string"
     );
+}
+
+#[test]
+fn test_scanner_category_filter() {
+    let recognizers = all_recognizers();
+    let config = Config::default();
+    let options = ScanOptions {
+        category: Some(Category::Xcode),
+        ..Default::default()
+    };
+
+    let result = scanner::scan(&recognizers, &config, &options);
+
+    for finding in &result.findings {
+        assert_eq!(
+            finding.category,
+            Category::Xcode,
+            "Found non-Xcode finding when filtering by Xcode: {}",
+            finding.description
+        );
+    }
 }
 
 #[test]

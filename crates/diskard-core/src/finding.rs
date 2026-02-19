@@ -47,6 +47,8 @@ pub enum Category {
     HuggingFace,
     Claude,
     VSCode,
+    Gradle,
+    CocoaPods,
     Generic,
 }
 
@@ -63,6 +65,8 @@ impl fmt::Display for Category {
             Self::HuggingFace => write!(f, "HuggingFace"),
             Self::Claude => write!(f, "Claude"),
             Self::VSCode => write!(f, "VS Code"),
+            Self::Gradle => write!(f, "Gradle"),
+            Self::CocoaPods => write!(f, "CocoaPods"),
             Self::Generic => write!(f, "Generic"),
         }
     }

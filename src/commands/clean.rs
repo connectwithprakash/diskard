@@ -6,15 +6,31 @@ use diskard_core::recognizers::all_recognizers;
 use diskard_core::scanner::{self, ScanOptions};
 use diskard_core::size::format_bytes;
 
-use crate::cli::RiskFilter;
+use crate::cli::{CategoryFilter, RiskFilter};
+use crate::commands::scan::parse_duration;
 
-pub fn run(dry_run: bool, permanent: bool, risk: RiskFilter, yes: bool) -> Result<()> {
+pub fn run(
+    dry_run: bool,
+    permanent: bool,
+    risk: RiskFilter,
+    category: Option<CategoryFilter>,
+    older_than: Option<String>,
+    yes: bool,
+) -> Result<()> {
     let config = Config::load()?;
     let recognizers = all_recognizers();
+
+    let older_duration = match older_than {
+        Some(s) => Some(parse_duration(&s)?),
+        None => None,
+    };
 
     let options = ScanOptions {
         max_risk: risk.to_risk_level(),
         min_size: config.defaults.min_size,
+        category: category.map(|c| c.to_category()),
+        older_than: older_duration,
+        ..Default::default()
     };
 
     let result = scanner::scan(&recognizers, &config, &options);

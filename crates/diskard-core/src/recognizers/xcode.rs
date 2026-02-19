@@ -133,6 +133,47 @@ impl Recognizer for Simulators {
     }
 }
 
+/// Xcode Archives — exported app archives.
+pub struct Archives;
+
+impl Recognizer for Archives {
+    fn name(&self) -> &'static str {
+        "Xcode Archives"
+    }
+
+    fn id(&self) -> &'static str {
+        "xcode-archives"
+    }
+
+    fn category(&self) -> Category {
+        Category::Xcode
+    }
+
+    fn scan(&self) -> Result<Vec<Finding>> {
+        let Some(home) = home() else {
+            return Ok(vec![]);
+        };
+        let path = home.join("Library/Developer/Xcode/Archives");
+        if !path.exists() {
+            return Ok(vec![]);
+        }
+
+        let size = dir_size(&path);
+        if size == 0 {
+            return Ok(vec![]);
+        }
+
+        Ok(vec![Finding {
+            path,
+            category: Category::Xcode,
+            risk: RiskLevel::Moderate,
+            size_bytes: size,
+            description: "Xcode build archives — old app exports that can be re-archived".into(),
+            last_modified: None,
+        }])
+    }
+}
+
 /// Xcode SwiftUI Previews cache.
 pub struct Previews;
 

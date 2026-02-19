@@ -15,17 +15,25 @@ fn main() -> anyhow::Result<()> {
     }
 
     match cli.command {
-        Command::Scan { risk, min_size } => {
-            commands::scan::run(risk, min_size, cli.format)?;
+        Command::Scan {
+            risk,
+            min_size,
+            category,
+            sort,
+            older_than,
+        } => {
+            commands::scan::run(risk, min_size, category, sort, older_than, cli.format)?;
         }
         Command::Clean {
             dry_run,
             permanent,
             risk,
+            category,
+            older_than,
             yes,
             ..
         } => {
-            commands::clean::run(dry_run, permanent, risk, yes)?;
+            commands::clean::run(dry_run, permanent, risk, category, older_than, yes)?;
         }
         Command::List { what } => match what {
             ListCommand::Targets => commands::list::targets()?,

@@ -32,6 +32,18 @@ pub enum Command {
         /// Minimum size to report (e.g., "10MB", "1GB")
         #[arg(long)]
         min_size: Option<String>,
+
+        /// Filter by category (e.g., "xcode", "node", "rust")
+        #[arg(long, short)]
+        category: Option<CategoryFilter>,
+
+        /// Sort results by field
+        #[arg(long, short, default_value = "size")]
+        sort: SortField,
+
+        /// Only show items older than duration (e.g., "7d", "30d", "1h")
+        #[arg(long)]
+        older_than: Option<String>,
     },
 
     /// Delete selected findings
@@ -51,6 +63,14 @@ pub enum Command {
         /// Maximum risk level to clean
         #[arg(long, short, default_value = "safe")]
         risk: RiskFilter,
+
+        /// Filter by category
+        #[arg(long, short)]
+        category: Option<CategoryFilter>,
+
+        /// Only clean items older than duration (e.g., "7d", "30d")
+        #[arg(long)]
+        older_than: Option<String>,
 
         /// Skip confirmation prompt
         #[arg(short = 'y', long)]
@@ -107,4 +127,60 @@ impl RiskFilter {
 pub enum OutputFormat {
     Table,
     Json,
+}
+
+#[derive(Clone, Copy, ValueEnum)]
+pub enum CategoryFilter {
+    Xcode,
+    Node,
+    Homebrew,
+    Python,
+    Rust,
+    Docker,
+    Ollama,
+    Huggingface,
+    Claude,
+    Vscode,
+    Gradle,
+    Cocoapods,
+    Generic,
+}
+
+impl CategoryFilter {
+    pub fn to_category(self) -> diskard_core::finding::Category {
+        use diskard_core::finding::Category;
+        match self {
+            Self::Xcode => Category::Xcode,
+            Self::Node => Category::Node,
+            Self::Homebrew => Category::Homebrew,
+            Self::Python => Category::Python,
+            Self::Rust => Category::Rust,
+            Self::Docker => Category::Docker,
+            Self::Ollama => Category::Ollama,
+            Self::Huggingface => Category::HuggingFace,
+            Self::Claude => Category::Claude,
+            Self::Vscode => Category::VSCode,
+            Self::Gradle => Category::Gradle,
+            Self::Cocoapods => Category::CocoaPods,
+            Self::Generic => Category::Generic,
+        }
+    }
+}
+
+#[derive(Clone, Copy, ValueEnum)]
+pub enum SortField {
+    Size,
+    Risk,
+    Category,
+}
+
+impl SortField {
+    pub fn to_sort_order(self) -> diskard_core::scanner::SortOrder {
+        use diskard_core::scanner::SortOrder;
+        match self {
+            Self::Size => SortOrder::Size,
+            Self::Risk => SortOrder::Risk,
+            Self::Category => SortOrder::Category,
+        }
+    }
 }
