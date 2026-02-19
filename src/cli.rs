@@ -10,7 +10,12 @@ use clap::{Parser, Subcommand, ValueEnum};
 )]
 pub struct Cli {
     #[command(subcommand)]
-    pub command: Command,
+    pub command: Option<Command>,
+
+    /// Launch interactive TUI mode
+    #[cfg(feature = "tui")]
+    #[arg(short = 'i', long = "interactive", global = true)]
+    pub interactive: bool,
 
     /// Output format
     #[arg(long, global = true, default_value = "table")]

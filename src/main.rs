@@ -14,7 +14,18 @@ fn main() -> anyhow::Result<()> {
         env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("warn")).init();
     }
 
-    match cli.command {
+    // Handle `diskard -i` shortcut
+    #[cfg(feature = "tui")]
+    if cli.interactive {
+        return run_interactive(None, None);
+    }
+
+    let Some(command) = cli.command else {
+        Cli::command().print_help()?;
+        return Ok(());
+    };
+
+    match command {
         Command::Scan {
             risk,
             min_size,
@@ -45,21 +56,7 @@ fn main() -> anyhow::Result<()> {
         },
         #[cfg(feature = "tui")]
         Command::Interactive { risk, category } => {
-            use diskard_core::config::Config;
-            use diskard_core::recognizers::all_recognizers;
-            use diskard_core::scanner::{self, ScanOptions};
-
-            let config = Config::load()?;
-            let recognizers = all_recognizers();
-            let options = ScanOptions {
-                max_risk: risk.to_risk_level(),
-                category: category.map(|c| c.to_category()),
-                ..Default::default()
-            };
-
-            println!("Scanning...");
-            let result = scanner::scan(&recognizers, &config, &options);
-            diskard_tui::run(result.findings)?;
+            run_interactive(Some(risk), category)?;
         }
         Command::Completions { shell } => {
             let mut cmd = Cli::command();
@@ -67,5 +64,30 @@ fn main() -> anyhow::Result<()> {
         }
     }
 
+    Ok(())
+}
+
+#[cfg(feature = "tui")]
+fn run_interactive(
+    risk: Option<cli::RiskFilter>,
+    category: Option<cli::CategoryFilter>,
+) -> anyhow::Result<()> {
+    use diskard_core::config::Config;
+    use diskard_core::recognizers::all_recognizers;
+    use diskard_core::scanner::{self, ScanOptions};
+
+    let config = Config::load()?;
+    let recognizers = all_recognizers();
+    let options = ScanOptions {
+        max_risk: risk
+            .map(|r| r.to_risk_level())
+            .unwrap_or(diskard_core::finding::RiskLevel::Moderate),
+        category: category.map(|c| c.to_category()),
+        ..Default::default()
+    };
+
+    println!("Scanning...");
+    let result = scanner::scan(&recognizers, &config, &options);
+    diskard_tui::run(result.findings)?;
     Ok(())
 }
