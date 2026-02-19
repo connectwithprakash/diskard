@@ -27,6 +27,21 @@ diskard scan --risk safe
 # Scan with minimum size filter
 diskard scan --min-size 100MB
 
+# Filter by category
+diskard scan --category xcode
+diskard scan --category node
+diskard scan --category rust
+
+# Sort by risk or category instead of size
+diskard scan --sort risk
+diskard scan --sort category
+
+# Only show items older than 30 days
+diskard scan --older-than 30d
+
+# Combine filters
+diskard scan --category xcode --risk safe --min-size 1GB
+
 # Clean (move to Trash by default)
 diskard clean --risk safe
 
@@ -35,6 +50,9 @@ diskard clean --dry-run
 
 # Permanently delete (no Trash)
 diskard clean --permanent --risk safe
+
+# Clean a specific category
+diskard clean --category node --risk safe -y
 
 # List available recognizers
 diskard list targets
@@ -47,13 +65,17 @@ diskard config path     # Print config file path
 
 ## Recognizers
 
+18 built-in recognizers across 13 categories:
+
 | Recognizer | Category | Path | Risk |
 |---|---|---|---|
 | Xcode DerivedData | Xcode | `~/Library/Developer/Xcode/DerivedData` | Safe |
 | Xcode DeviceSupport | Xcode | `~/Library/Developer/Xcode/iOS DeviceSupport` | Moderate |
 | Xcode Simulators | Xcode | `~/Library/Developer/CoreSimulator/Devices` | Risky |
+| Xcode Archives | Xcode | `~/Library/Developer/Xcode/Archives` | Moderate |
 | Xcode Previews | Xcode | `~/Library/Developer/Xcode/UserData/Previews` | Safe |
 | npm cache | Node.js | `~/.npm` | Safe |
+| node_modules | Node.js | `**/node_modules/` (with package.json) | Safe |
 | Homebrew cache | Homebrew | `~/Library/Caches/Homebrew` | Safe |
 | pip cache | Python | `~/Library/Caches/pip` | Safe |
 | Cargo target dirs | Rust | `**/target/` (with Cargo.toml) | Moderate |
@@ -62,6 +84,9 @@ diskard config path     # Print config file path
 | HuggingFace cache | HuggingFace | `~/.cache/huggingface` | Moderate |
 | Claude Code data | Claude | `~/.claude/projects/`, `~/.claude/debug/` | Moderate |
 | VS Code extensions | VS Code | `~/.vscode/extensions` (old versions) | Moderate |
+| Gradle cache | Gradle | `~/.gradle/caches`, `~/.gradle/wrapper/dists` | Safe |
+| Maven repository | Gradle | `~/.m2/repository` | Moderate |
+| CocoaPods cache | CocoaPods | `~/Library/Caches/CocoaPods` | Safe |
 | .DS_Store files | Generic | `**/.DS_Store` | Safe |
 
 ## Configuration
