@@ -125,13 +125,7 @@ fn test_scanner_respects_risk_filter() {
             200,
             None,
         ),
-        make_finding(
-            "/tmp/c".into(),
-            Category::Node,
-            RiskLevel::Risky,
-            300,
-            None,
-        ),
+        make_finding("/tmp/c".into(), Category::Node, RiskLevel::Risky, 300, None),
     ];
     let recs = fake_recognizers(vec![(Category::Node, findings)]);
     let config = Config::default();
@@ -160,7 +154,13 @@ fn test_scanner_respects_risk_filter() {
 #[test]
 fn test_scanner_min_size_filter() {
     let findings = vec![
-        make_finding("/tmp/small".into(), Category::Generic, RiskLevel::Safe, 50, None),
+        make_finding(
+            "/tmp/small".into(),
+            Category::Generic,
+            RiskLevel::Safe,
+            50,
+            None,
+        ),
         make_finding(
             "/tmp/big".into(),
             Category::Generic,
@@ -215,7 +215,13 @@ fn test_scanner_older_than_filter() {
     let old = Duration::from_secs(60 * 60 * 24 * 30); // 30 days
     let recent = Duration::from_secs(60); // 1 minute
     let findings = vec![
-        make_finding("/tmp/old".into(), Category::Generic, RiskLevel::Safe, 100, Some(old)),
+        make_finding(
+            "/tmp/old".into(),
+            Category::Generic,
+            RiskLevel::Safe,
+            100,
+            Some(old),
+        ),
         make_finding(
             "/tmp/new".into(),
             Category::Generic,
@@ -238,9 +244,27 @@ fn test_scanner_older_than_filter() {
 #[test]
 fn test_scanner_sort_by_size() {
     let findings = vec![
-        make_finding("/tmp/small".into(), Category::Generic, RiskLevel::Safe, 10, None),
-        make_finding("/tmp/big".into(), Category::Generic, RiskLevel::Safe, 9999, None),
-        make_finding("/tmp/mid".into(), Category::Generic, RiskLevel::Safe, 500, None),
+        make_finding(
+            "/tmp/small".into(),
+            Category::Generic,
+            RiskLevel::Safe,
+            10,
+            None,
+        ),
+        make_finding(
+            "/tmp/big".into(),
+            Category::Generic,
+            RiskLevel::Safe,
+            9999,
+            None,
+        ),
+        make_finding(
+            "/tmp/mid".into(),
+            Category::Generic,
+            RiskLevel::Safe,
+            500,
+            None,
+        ),
     ];
     let recs = fake_recognizers(vec![(Category::Generic, findings)]);
     let config = Config::default();
@@ -250,14 +274,30 @@ fn test_scanner_sort_by_size() {
     };
     let result = scanner::scan(&recs, &config, &opts);
     let sizes: Vec<u64> = result.findings.iter().map(|f| f.size_bytes).collect();
-    assert_eq!(sizes, vec![9999, 500, 10], "Should be sorted descending by size");
+    assert_eq!(
+        sizes,
+        vec![9999, 500, 10],
+        "Should be sorted descending by size"
+    );
 }
 
 #[test]
 fn test_scanner_sort_by_risk() {
     let findings = vec![
-        make_finding("/tmp/safe".into(), Category::Generic, RiskLevel::Safe, 100, None),
-        make_finding("/tmp/risky".into(), Category::Generic, RiskLevel::Risky, 100, None),
+        make_finding(
+            "/tmp/safe".into(),
+            Category::Generic,
+            RiskLevel::Safe,
+            100,
+            None,
+        ),
+        make_finding(
+            "/tmp/risky".into(),
+            Category::Generic,
+            RiskLevel::Risky,
+            100,
+            None,
+        ),
         make_finding(
             "/tmp/moderate".into(),
             Category::Generic,
@@ -284,8 +324,20 @@ fn test_scanner_sort_by_risk() {
 #[test]
 fn test_scanner_total_reclaimable() {
     let findings = vec![
-        make_finding("/tmp/a".into(), Category::Generic, RiskLevel::Safe, 100, None),
-        make_finding("/tmp/b".into(), Category::Generic, RiskLevel::Safe, 250, None),
+        make_finding(
+            "/tmp/a".into(),
+            Category::Generic,
+            RiskLevel::Safe,
+            100,
+            None,
+        ),
+        make_finding(
+            "/tmp/b".into(),
+            Category::Generic,
+            RiskLevel::Safe,
+            250,
+            None,
+        ),
     ];
     let recs = fake_recognizers(vec![(Category::Generic, findings)]);
     let config = Config::default();
@@ -346,7 +398,10 @@ fn test_cleaner_permanent_delete_file() {
     let result = cleaner::clean(&findings, DeleteMode::Permanent).unwrap();
     assert_eq!(result.deleted_count, 1);
     assert_eq!(result.freed_bytes, 7);
-    assert!(!file_path.exists(), "Permanent delete should remove the file");
+    assert!(
+        !file_path.exists(),
+        "Permanent delete should remove the file"
+    );
 }
 
 #[test]
@@ -369,7 +424,10 @@ fn test_cleaner_permanent_delete_directory() {
 
     let result = cleaner::clean(&findings, DeleteMode::Permanent).unwrap();
     assert_eq!(result.deleted_count, 1);
-    assert!(!dir_path.exists(), "Permanent delete should remove the directory");
+    assert!(
+        !dir_path.exists(),
+        "Permanent delete should remove the directory"
+    );
 }
 
 #[test]

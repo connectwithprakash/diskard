@@ -9,7 +9,11 @@ Developers accumulate tens of GBs of reclaimable space — Xcode DerivedData, np
 ## Install
 
 ```bash
+# Via cargo
 cargo install diskard
+
+# Via Homebrew
+brew install connectwithprakash/tap/diskard
 ```
 
 ## Usage
@@ -54,6 +58,9 @@ diskard clean --permanent --risk safe
 # Clean a specific category
 diskard clean --category node --risk safe -y
 
+# Interactive TUI mode (requires --features tui)
+diskard interactive
+
 # List available recognizers
 diskard list targets
 
@@ -61,6 +68,11 @@ diskard list targets
 diskard config init     # Create default config
 diskard config show     # Show current config
 diskard config path     # Print config file path
+
+# Generate shell completions
+diskard completions zsh > ~/.zfunc/_diskard
+diskard completions bash > /etc/bash_completion.d/diskard
+diskard completions fish > ~/.config/fish/completions/diskard.fish
 ```
 
 ## Recognizers
