@@ -34,7 +34,7 @@ toml = "0.8"
 tempfile = "3.14"
 
 [features]
-default = []
+default = ["tui"]
 tui = ["dep:diskard-tui"]
 
 [profile.release]
