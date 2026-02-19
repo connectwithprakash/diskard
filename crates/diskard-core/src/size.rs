@@ -15,7 +15,8 @@ pub fn dir_size(path: &Path) -> u64 {
         return path.metadata().map(|m| m.len()).unwrap_or(0);
     }
 
-    jwalk::WalkDir::new(path)
+    let resolved = path.canonicalize().unwrap_or_else(|_| path.to_path_buf());
+    jwalk::WalkDir::new(resolved)
         .skip_hidden(false)
         .into_iter()
         .filter_map(|entry| entry.ok())
