@@ -115,7 +115,7 @@ pub fn run(findings: Vec<Finding>) -> io::Result<()> {
                                         let is_file = state
                                             .entries
                                             .get(state.selected)
-                                            .map_or(false, |e| !e.is_dir);
+                                            .is_some_and(|e| !e.is_dir);
                                         app.status_message = Some(if is_file {
                                             " Not a directory.".into()
                                         } else {
