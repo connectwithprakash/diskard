@@ -4,6 +4,7 @@
     ".": {
       "release-type": "rust",
       "component": "diskard",
+      "include-component-in-tag": false,
       "bump-minor-pre-major": true,
       "extra-files": [
         "crates/diskard-core/Cargo.toml",
