@@ -7,6 +7,7 @@ pub struct App {
     pub should_quit: bool,
     pub show_help: bool,
     pub mode: AppMode,
+    pub status_message: Option<String>,
 }
 
 pub struct FindingItem {
@@ -14,6 +15,7 @@ pub struct FindingItem {
     pub checked: bool,
 }
 
+#[derive(PartialEq)]
 pub enum AppMode {
     Browse,
     Confirm,
@@ -35,6 +37,7 @@ impl App {
             should_quit: false,
             show_help: false,
             mode: AppMode::Browse,
+            status_message: None,
         }
     }
 
@@ -56,6 +59,13 @@ impl App {
         }
     }
 
+    pub fn select_all(&mut self) {
+        let all_checked = self.findings.iter().all(|f| f.checked);
+        for item in &mut self.findings {
+            item.checked = !all_checked;
+        }
+    }
+
     pub fn checked_count(&self) -> usize {
         self.findings.iter().filter(|f| f.checked).count()
     }
@@ -66,5 +76,20 @@ impl App {
             .filter(|f| f.checked)
             .map(|f| f.finding.size_bytes)
             .sum()
+    }
+
+    pub fn checked_findings(&self) -> Vec<Finding> {
+        self.findings
+            .iter()
+            .filter(|f| f.checked)
+            .map(|f| f.finding.clone())
+            .collect()
+    }
+
+    pub fn remove_checked(&mut self) {
+        self.findings.retain(|f| !f.checked);
+        if self.selected >= self.findings.len() && !self.findings.is_empty() {
+            self.selected = self.findings.len() - 1;
+        }
     }
 }

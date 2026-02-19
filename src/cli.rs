@@ -88,6 +88,24 @@ pub enum Command {
         #[command(subcommand)]
         action: ConfigAction,
     },
+
+    /// Interactive TUI mode — scan, select, and clean
+    #[cfg(feature = "tui")]
+    Interactive {
+        /// Maximum risk level to show
+        #[arg(long, short, default_value = "moderate")]
+        risk: RiskFilter,
+
+        /// Filter by category
+        #[arg(long, short)]
+        category: Option<CategoryFilter>,
+    },
+
+    /// Generate shell completions
+    Completions {
+        /// Shell to generate completions for
+        shell: clap_complete::Shell,
+    },
 }
 
 #[derive(Subcommand)]
