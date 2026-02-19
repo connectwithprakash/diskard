@@ -8,8 +8,38 @@ use ratatui::Frame;
 
 use crate::app::App;
 
+const BAR_WIDTH: usize = 10;
+
+fn size_bar(size: u64, max_size: u64) -> String {
+    if max_size == 0 {
+        return " ".repeat(BAR_WIDTH);
+    }
+    let ratio = (size as f64 / max_size as f64).clamp(0.0, 1.0);
+    let filled = ratio * BAR_WIDTH as f64;
+    let full_blocks = filled as usize;
+    let remainder = filled - full_blocks as f64;
+
+    let mut bar = "█".repeat(full_blocks.min(BAR_WIDTH));
+    if full_blocks < BAR_WIDTH {
+        const EIGHTHS: [char; 9] = [' ', '▏', '▎', '▍', '▌', '▋', '▊', '▉', '█'];
+        let idx = (remainder * 8.0) as usize;
+        bar.push(EIGHTHS[idx.min(8)]);
+        for _ in (full_blocks + 1)..BAR_WIDTH {
+            bar.push(' ');
+        }
+    }
+    bar
+}
+
 /// Render the results list.
 pub fn render(frame: &mut Frame, area: Rect, app: &App) {
+    let max_size = app
+        .findings
+        .iter()
+        .map(|f| f.finding.size_bytes)
+        .max()
+        .unwrap_or(0);
+
     let items: Vec<ListItem> = app
         .findings
         .iter()
@@ -25,6 +55,11 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
                 Span::styled(format!(" {checkbox} "), Style::default().fg(Color::White)),
                 Span::styled(
                     format!("{:>10}", item.finding.size_human()),
+                    Style::default().fg(Color::Cyan),
+                ),
+                Span::raw(" "),
+                Span::styled(
+                    size_bar(item.finding.size_bytes, max_size),
                     Style::default().fg(Color::Cyan),
                 ),
                 Span::raw("  "),

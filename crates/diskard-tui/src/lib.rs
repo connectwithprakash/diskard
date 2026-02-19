@@ -27,16 +27,24 @@ pub fn run(findings: Vec<Finding>) -> io::Result<()> {
         terminal.draw(|frame| {
             let area = frame.area();
 
-            // Main layout: results + status bar
-            let chunks = Layout::vertical([Constraint::Min(5), Constraint::Length(1)]).split(area);
+            // Main layout: header + results + status bar
+            let chunks = Layout::vertical([
+                Constraint::Length(5),
+                Constraint::Min(5),
+                Constraint::Length(1),
+            ])
+            .split(area);
+
+            // Disk summary header
+            components::header::render(frame, chunks[0], &app);
 
             // Main content area
             if app.mode == AppMode::DrillDown {
                 if let Some(ref state) = app.drill_down {
-                    components::drilldown::render(frame, chunks[0], state);
+                    components::drilldown::render(frame, chunks[1], state);
                 }
             } else {
-                components::results::render(frame, chunks[0], &app);
+                components::results::render(frame, chunks[1], &app);
             }
 
             // Status bar
@@ -50,7 +58,7 @@ pub fn run(findings: Vec<Finding>) -> io::Result<()> {
             };
             let status_bar = ratatui::widgets::Paragraph::new(status)
                 .style(ratatui::style::Style::default().bg(ratatui::style::Color::DarkGray));
-            frame.render_widget(status_bar, chunks[1]);
+            frame.render_widget(status_bar, chunks[2]);
 
             // Overlays
             if app.mode == AppMode::Confirm || app.mode == AppMode::ConfirmDrillDown {

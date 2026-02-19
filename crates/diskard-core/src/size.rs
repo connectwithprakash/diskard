@@ -25,6 +25,13 @@ pub fn dir_size(path: &Path) -> u64 {
         .sum()
 }
 
+/// Return (total_bytes, free_bytes) for the filesystem containing `path`.
+pub fn disk_usage(path: &std::path::Path) -> Option<(u64, u64)> {
+    let total = fs2::total_space(path).ok()?;
+    let free = fs2::free_space(path).ok()?;
+    Some((total, free))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

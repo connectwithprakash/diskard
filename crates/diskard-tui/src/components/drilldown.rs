@@ -7,8 +7,38 @@ use ratatui::Frame;
 
 use crate::app::DrillDownState;
 
+const BAR_WIDTH: usize = 10;
+
+fn size_bar(size: u64, max_size: u64) -> String {
+    if max_size == 0 {
+        return " ".repeat(BAR_WIDTH);
+    }
+    let ratio = (size as f64 / max_size as f64).clamp(0.0, 1.0);
+    let filled = ratio * BAR_WIDTH as f64;
+    let full_blocks = filled as usize;
+    let remainder = filled - full_blocks as f64;
+
+    let mut bar = "█".repeat(full_blocks.min(BAR_WIDTH));
+    if full_blocks < BAR_WIDTH {
+        const EIGHTHS: [char; 9] = [' ', '▏', '▎', '▍', '▌', '▋', '▊', '▉', '█'];
+        let idx = (remainder * 8.0) as usize;
+        bar.push(EIGHTHS[idx.min(8)]);
+        for _ in (full_blocks + 1)..BAR_WIDTH {
+            bar.push(' ');
+        }
+    }
+    bar
+}
+
 /// Render the drill-down directory listing.
 pub fn render(frame: &mut Frame, area: Rect, state: &DrillDownState) {
+    let max_size = state
+        .entries
+        .iter()
+        .map(|e| e.size_bytes)
+        .max()
+        .unwrap_or(0);
+
     let items: Vec<ListItem> = state
         .entries
         .iter()
@@ -24,6 +54,11 @@ pub fn render(frame: &mut Frame, area: Rect, state: &DrillDownState) {
                 Span::styled(format!(" {checkbox} "), Style::default().fg(Color::White)),
                 Span::styled(
                     format!("{:>10}", format_bytes(entry.size_bytes)),
+                    Style::default().fg(Color::Cyan),
+                ),
+                Span::raw(" "),
+                Span::styled(
+                    size_bar(entry.size_bytes, max_size),
                     Style::default().fg(Color::Cyan),
                 ),
                 Span::raw("  "),

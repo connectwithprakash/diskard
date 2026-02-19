@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use diskard_core::finding::Finding;
-use diskard_core::size::dir_size;
+use diskard_core::size::{dir_size, disk_usage};
 
 /// Application state for the TUI.
 pub struct App {
@@ -12,6 +12,8 @@ pub struct App {
     pub mode: AppMode,
     pub status_message: Option<String>,
     pub drill_down: Option<DrillDownState>,
+    pub disk_total: u64,
+    pub disk_free: u64,
 }
 
 pub struct FindingItem {
@@ -194,6 +196,8 @@ impl App {
             })
             .collect();
 
+        let (disk_total, disk_free) = disk_usage(Path::new("/")).unwrap_or((0, 0));
+
         Self {
             findings: items,
             selected: 0,
@@ -202,7 +206,13 @@ impl App {
             mode: AppMode::Browse,
             status_message: None,
             drill_down: None,
+            disk_total,
+            disk_free,
         }
+    }
+
+    pub fn total_reclaimable(&self) -> u64 {
+        self.findings.iter().map(|f| f.finding.size_bytes).sum()
     }
 
     pub fn move_up(&mut self) {
