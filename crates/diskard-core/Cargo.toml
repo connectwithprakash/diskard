@@ -5,6 +5,7 @@ edition = "2021"
 rust-version = "1.75"
 description = "Core library for diskard — developer-aware disk cleanup"
 license = "MIT OR Apache-2.0"
+repository = "https://github.com/connectwithprakash/diskard"
 
 [dependencies]
 jwalk = "0.8"
