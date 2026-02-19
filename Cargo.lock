@@ -377,7 +377,7 @@ dependencies = [
 
 [[package]]
 name = "diskard"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -394,7 +394,7 @@ dependencies = [
 
 [[package]]
 name = "diskard-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "bytesize",
  "chrono",
@@ -411,7 +411,7 @@ dependencies = [
 
 [[package]]
 name = "diskard-tui"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "crossterm",
  "diskard-core",

@@ -1,13 +1,14 @@
 [package]
 name = "diskard-tui"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 rust-version = "1.75"
 description = "TUI frontend for diskard"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/connectwithprakash/diskard"
+readme = "../../README.md"
 
 [dependencies]
-diskard-core = { version = "0.1.0", path = "../diskard-core" }
+diskard-core = { version = "0.1.1", path = "../diskard-core" }
 ratatui = { version = "0.29", features = ["crossterm"] }
 crossterm = "0.28"
