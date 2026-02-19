@@ -88,3 +88,23 @@ jobs:
           files: |
             artifacts/**/*.tar.gz
             artifacts/**/*.sha256
+
+  publish:
+    name: Publish to crates.io
+    needs: release
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Publish crates
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          cargo publish -p diskard-core
+          sleep 30
+          cargo publish -p diskard-tui
+          sleep 30
+          cargo publish -p diskard
