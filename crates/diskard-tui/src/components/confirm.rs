@@ -9,6 +9,16 @@ use crate::app::App;
 
 /// Render a deletion confirmation dialog.
 pub fn render(frame: &mut Frame, area: Rect, app: &App) {
+    let (count, size) = if let Some(ref state) = app.drill_down {
+        (state.checked_count(), state.checked_size())
+    } else {
+        (app.checked_count(), app.checked_size())
+    };
+
+    render_dialog(frame, area, count, size);
+}
+
+fn render_dialog(frame: &mut Frame, area: Rect, count: usize, size: u64) {
     let popup_width = 50.min(area.width.saturating_sub(4));
     let popup_height = 7.min(area.height.saturating_sub(2));
     let popup_area = Rect::new(
@@ -21,11 +31,7 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
     let text = vec![
         Line::from(""),
         Line::from(Span::styled(
-            format!(
-                "Delete {} items ({})?",
-                app.checked_count(),
-                format_bytes(app.checked_size()),
-            ),
+            format!("Delete {} items ({})?", count, format_bytes(size)),
             Style::default().fg(Color::Yellow),
         )),
         Line::from(""),

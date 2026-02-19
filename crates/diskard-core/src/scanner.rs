@@ -1,4 +1,3 @@
-use rayon::prelude::*;
 use std::time::{Duration, Instant, SystemTime};
 
 use crate::config::Config;
@@ -59,9 +58,11 @@ pub fn scan(
         .filter(|r| options.category.is_none() || Some(r.category()) == options.category)
         .collect();
 
-    // Run recognizers in parallel
+    // Run recognizers sequentially to avoid file descriptor exhaustion.
+    // Each recognizer uses jwalk (rayon-based) internally for dir_size,
+    // and running them all in parallel can exceed the OS open-file limit.
     let results: Vec<Result<Vec<Finding>>> = enabled
-        .par_iter()
+        .iter()
         .map(|recognizer| {
             log::debug!("Running recognizer: {}", recognizer.name());
             recognizer.scan()

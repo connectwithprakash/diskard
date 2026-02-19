@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use diskard_core::finding::Finding;
-use diskard_core::size::dir_size;
+use diskard_core::size::{dir_size, disk_usage};
 
 /// Application state for the TUI.
 pub struct App {
@@ -12,6 +12,8 @@ pub struct App {
     pub mode: AppMode,
     pub status_message: Option<String>,
     pub drill_down: Option<DrillDownState>,
+    pub disk_total: u64,
+    pub disk_free: u64,
 }
 
 pub struct FindingItem {
@@ -24,6 +26,7 @@ pub enum AppMode {
     Browse,
     Confirm,
     DrillDown,
+    ConfirmDrillDown,
 }
 
 /// A single entry (file or directory) inside a drill-down listing.
@@ -32,6 +35,7 @@ pub struct DrillDownEntry {
     pub path: PathBuf,
     pub size_bytes: u64,
     pub is_dir: bool,
+    pub checked: bool,
 }
 
 /// State for the drill-down inspector.
@@ -63,6 +67,7 @@ fn scan_directory(path: &Path) -> Option<Vec<DrillDownEntry>> {
                 path,
                 size_bytes,
                 is_dir,
+                checked: false,
             }
         })
         .collect();
@@ -135,6 +140,50 @@ impl DrillDownState {
     pub fn current_path(&self) -> &Path {
         self.stack.last().unwrap()
     }
+
+    pub fn toggle_selected(&mut self) {
+        if let Some(entry) = self.entries.get_mut(self.selected) {
+            entry.checked = !entry.checked;
+        }
+    }
+
+    pub fn select_all(&mut self) {
+        let all_checked = self.entries.iter().all(|e| e.checked);
+        for entry in &mut self.entries {
+            entry.checked = !all_checked;
+        }
+    }
+
+    pub fn checked_count(&self) -> usize {
+        self.entries.iter().filter(|e| e.checked).count()
+    }
+
+    pub fn checked_size(&self) -> u64 {
+        self.entries
+            .iter()
+            .filter(|e| e.checked)
+            .map(|e| e.size_bytes)
+            .sum()
+    }
+
+    pub fn checked_paths(&self) -> Vec<(PathBuf, u64)> {
+        self.entries
+            .iter()
+            .filter(|e| e.checked)
+            .map(|e| (e.path.clone(), e.size_bytes))
+            .collect()
+    }
+
+    /// Remove checked entries and rescan the current directory.
+    pub fn remove_checked(&mut self) {
+        let current = self.current_path().to_path_buf();
+        if let Some(entries) = scan_directory(&current) {
+            self.entries = entries;
+            if self.selected >= self.entries.len() && !self.entries.is_empty() {
+                self.selected = self.entries.len() - 1;
+            }
+        }
+    }
 }
 
 impl App {
@@ -147,6 +196,8 @@ impl App {
             })
             .collect();
 
+        let (disk_total, disk_free) = disk_usage(Path::new("/")).unwrap_or((0, 0));
+
         Self {
             findings: items,
             selected: 0,
@@ -155,7 +206,13 @@ impl App {
             mode: AppMode::Browse,
             status_message: None,
             drill_down: None,
+            disk_total,
+            disk_free,
         }
+    }
+
+    pub fn total_reclaimable(&self) -> u64 {
+        self.findings.iter().map(|f| f.finding.size_bytes).sum()
     }
 
     pub fn move_up(&mut self) {
