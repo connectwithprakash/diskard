@@ -124,6 +124,11 @@ disabled = []
 - **Moderate** — Can be regenerated but may require downloads or time
 - **Risky** — May contain user data or require manual reconfiguration
 
+## Built With
+
+- [Claude Code](https://claude.ai/code) - Anthropic's AI coding assistant
+- [Codex](https://openai.com/codex) - OpenAI's AI coding assistant
+
 ## License
 
 Dual-licensed under [MIT](LICENSE-MIT) or [Apache 2.0](LICENSE-APACHE).
