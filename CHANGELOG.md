@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/connectwithprakash/diskard/compare/v0.2.0...v0.2.1) (2026-02-22)
+
+
+### Bug Fixes
+
+* **ci:** exclude component prefix from release tags ([739b69b](https://github.com/connectwithprakash/diskard/commit/739b69bf7c719d4b190658fc77a2adcc6c555e19))
+
 ## [0.2.0](https://github.com/connectwithprakash/diskard/compare/diskard-v0.1.2...diskard-v0.2.0) (2026-02-19)
 
 
