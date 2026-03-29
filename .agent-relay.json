@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "server": "http://localhost:8000",
+  "relays": {
+    "default": {
+      "relay_id": "relay-fAhq8bg8-Jc",
+      "token": "vKKKkmrz31ZHsZrszzFnR8atyiUHDkyO2pzZaa50c9Y",
+      "my_agent": "session3"
+    }
+  }
+}
